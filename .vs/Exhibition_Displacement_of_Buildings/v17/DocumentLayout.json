@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\assets\\scripts\\model.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\model.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\assets\\scripts\\earthquake.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\earthquake.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|d:\\ptilopsixuan\\myproject\\unity\u0027s\\exhibition_displacement_of_buildings\\assets\\scripts\\myclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\myclass.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\assets\\scripts\\myfunc.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{EA9A8B51-77AF-D060-C56C-BC8E07287568}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\myfunc.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MyFunc.cs",
+              "DocumentMoniker": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\MyFunc.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\MyFunc.cs",
+              "ToolTip": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\MyFunc.cs",
+              "RelativeToolTip": "Assets\\Scripts\\MyFunc.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAsAAAA0AAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T05:52:41.171Z",
+              "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MyClass.cs",
+              "DocumentMoniker": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\MyClass.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\MyClass.cs",
+              "ToolTip": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\MyClass.cs",
+              "RelativeToolTip": "Assets\\Scripts\\MyClass.cs",
+              "ViewState": "AQIAABcAAAAAAAAAAKBhwGkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T07:37:20.787Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "model.cs",
+              "DocumentMoniker": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\model.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\model.cs",
+              "ToolTip": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\model.cs",
+              "RelativeToolTip": "Assets\\Scripts\\model.cs",
+              "ViewState": "AQIAAE4AAAAAAAAAAAAAwG4AAABqAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T05:52:14.503Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "earthquake.cs",
+              "DocumentMoniker": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\earthquake.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\earthquake.cs",
+              "ToolTip": "D:\\Ptilopsixuan\\MyProject\\Unity\u0027s\\Exhibition_Displacement_of_Buildings\\Assets\\Scripts\\earthquake.cs",
+              "RelativeToolTip": "Assets\\Scripts\\earthquake.cs",
+              "ViewState": "AQIAAIcAAAAAAAAAAADwv8gAAAAYAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-04-08T06:30:45.004Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
