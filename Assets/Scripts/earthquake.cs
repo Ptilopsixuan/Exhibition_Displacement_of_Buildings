@@ -2,18 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
-using System.Threading;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
-using UnityEngine.UIElements;
 
 public class earthquake : MonoBehaviour
 {
     public UnityEngine.UI.Slider amplificationSlider;
     float maxDisplacement = 500 / 100;//500 is nearly maxima in this displacement data
 
-    List<MyClass.Building> buildings;
     DataTable displacement;
 
     static int currentStep = 0;
@@ -26,7 +21,7 @@ public class earthquake : MonoBehaviour
         currentStep = 0;
         isMoving = true;
         Gradient gradient = ColorBar();
-        buildings = model.buildings;
+        //graph g = readDisplacement.g;
         //Debug.Log("buildings' count: " + buildings.Count);
         StartCoroutine(IterateSimulation(UpdateInterval, gradient));// repeat this function every set interval
     }
@@ -35,103 +30,113 @@ public class earthquake : MonoBehaviour
     {
         while (isMoving)//Loop the time steps
         {
-            foreach (MyClass.Building building in buildings)//Loop the buildings
+            print(1);
+
+            MyClass.Graph gg = new MyClass.Graph();
+            gg.Exhibition(currentStep);
+
+            foreach (MyClass.Building building in MyClass.Building.buildings)//Loop the buildings
             {
-                Vector3[] positions = building.pos;//maintain the original position
-                displacement = building.displacement;
-                float amplification = amplificationSlider.value; // Get amplification value each iteration
+                //try
+                //{
+                    displacement = building.displacement;
+                    Vector3[] positions = building.pos;//maintain the original position
+                    float amplification = amplificationSlider.value; // Get amplification value each iteration
 
-                //classify all the children GameObjects
-                Transform[] childObjects = building.original.transform.GetComponentsInChildren<Transform>();
-                List<GameObject> conns = new List<GameObject>();
-                List<GameObject> shell3s = new List<GameObject>();
-                List<GameObject> shell4s = new List<GameObject>();
-                foreach (Transform childObject in childObjects)
-                {
-                    if (childObject.CompareTag("line")) { conns.Add(childObject.gameObject); }
-                    else if (childObject.CompareTag("shell3")) { shell3s.Add(childObject.gameObject); }
-                    else if (childObject.CompareTag("shell4")) { shell4s.Add(childObject.gameObject); }
-                }
+                    //classify all the children GameObjects
+                    //Transform[] childObjects = building.original.transform.GetComponentsInChildren<Transform>();
+                    List<GameObject> conns = building.childrenConn;//new List<GameObject>();
+                    List<GameObject> shell3s = building.childrenS3R;//new List<GameObject>();
+                    List<GameObject> shell4s = building.childrenS4R;//new List<GameObject>();
+                    //foreach (Transform childObject in childObjects)
+                    //{
+                    //    if (childObject.CompareTag("line")) { conns.Add(childObject.gameObject); }
+                    //    else if (childObject.CompareTag("shell3")) { shell3s.Add(childObject.gameObject); }
+                    //    else if (childObject.CompareTag("shell4")) { shell4s.Add(childObject.gameObject); }
+                    //}
 
-                for (int i = 0; i < building.conn.Length; i++)//literate the connections
-                {
-                    LineRenderer line = conns[i].GetComponent<LineRenderer>();
-                    int node1Index = (int)building.conn[i][0];
-                    int node2Index = (int)building.conn[i][1];
-                    //in following 3 lines, multiply by 2 to skip a column,
-                    //devided by 100 to amplify displacements 100 times because of coordinates are devided by 1e4
-                    float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
-                    float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
-                    float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
-                    Vector3 pos1 = positions[node1Index];
-                    Vector3 pos2 = positions[node2Index];
-                    pos1.x += (move1 - groundmove) * amplification ;
-                    pos2.x += (move2 - groundmove) * amplification ;
-                    line.SetPositions(new Vector3[2] { pos1, pos2 });
+                    for (int i = 0; i < building.conn.Length; i++)//literate the connections
+                    {
+                        LineRenderer line = conns[i].GetComponent<LineRenderer>();
+                        int node1Index = (int)building.conn[i][0];
+                        int node2Index = (int)building.conn[i][1];
+                        //in following 3 lines, multiply by 2 to skip a column,
+                        //devided by 100 to amplify displacements 100 times because of coordinates are devided by 1e4
+                        float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
+                        float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
+                        float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
+                        Vector3 pos1 = positions[node1Index];
+                        Vector3 pos2 = positions[node2Index];
+                        pos1.x += (move1 - groundmove) * amplification;
+                        pos2.x += (move2 - groundmove) * amplification;
+                        line.SetPositions(new Vector3[2] { pos1, pos2 });
 
-                    float displacementRatio = Math.Abs(((move1 + move2) / 2) - groundmove) / maxDisplacement;
+                        float displacementRatio = Math.Abs(((move1 + move2) / 2) - groundmove) / maxDisplacement;
 
-                    Color lineColor = gradient.Evaluate(displacementRatio);
-                    line.GetComponent<LineRenderer>().material.color = lineColor;
-                }
-                //same as the line
-                for (int i = 0; i < building.s3r.Length; i++)//literate the shells
-                {
-                    MeshRenderer Mesh = shell3s[i].GetComponent<MeshRenderer>();
-                    int node1Index = (int)building.s3r[i][0];
-                    int node2Index = (int)building.s3r[i][1];
-                    int node3Index = (int)building.s3r[i][2];
-                    float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
-                    float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
-                    float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
-                    float move3 = Convert.ToSingle(displacement.Rows[node3Index][currentStep]) / 100;
-                    Vector3 pos1 = positions[node1Index];
-                    Vector3 pos2 = positions[node2Index];
-                    Vector3 pos3 = positions[node3Index];
-                    pos1.x += (move1 - groundmove) * amplification;
-                    pos2.x += (move2 - groundmove) * amplification;
-                    pos3.x += (move3 - groundmove) * amplification;
-                    shell3s[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { pos1, pos2, pos3 };
+                        Color lineColor = gradient.Evaluate(displacementRatio);
+                        line.GetComponent<LineRenderer>().material.color = lineColor;
+                    }
+                    //same as the line
+                    for (int i = 0; i < building.s3r.Length; i++)//literate the shells
+                    {
+                        MeshRenderer Mesh = shell3s[i].GetComponent<MeshRenderer>();
+                        int node1Index = (int)building.s3r[i][0];
+                        int node2Index = (int)building.s3r[i][1];
+                        int node3Index = (int)building.s3r[i][2];
+                        float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
+                        float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
+                        float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
+                        float move3 = Convert.ToSingle(displacement.Rows[node3Index][currentStep]) / 100;
+                        Vector3 pos1 = positions[node1Index];
+                        Vector3 pos2 = positions[node2Index];
+                        Vector3 pos3 = positions[node3Index];
+                        pos1.x += (move1 - groundmove) * amplification;
+                        pos2.x += (move2 - groundmove) * amplification;
+                        pos3.x += (move3 - groundmove) * amplification;
+                        shell3s[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { pos1, pos2, pos3 };
 
-                    float displacementRatio = Math.Abs(((move1 + move2 + move3) / 3) - groundmove) / maxDisplacement;
+                        float displacementRatio = Math.Abs(((move1 + move2 + move3) / 3) - groundmove) / maxDisplacement;
 
-                    Color meshColor = gradient.Evaluate(displacementRatio);
-                    Mesh.material.color = meshColor;
-                }
-                for (int i = 0; i < building.s4r.Length; i++)//literate the shears
-                {
-                    MeshRenderer Mesh = shell4s[i].GetComponent<MeshRenderer>();
-                    int node1Index = (int)building.s4r[i][0];
-                    int node2Index = (int)building.s4r[i][1];
-                    int node3Index = (int)building.s4r[i][2];
-                    int node4Index = (int)building.s4r[i][3];
-                    float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
-                    float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
-                    float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
-                    float move3 = Convert.ToSingle(displacement.Rows[node3Index][currentStep]) / 100;
-                    float move4 = Convert.ToSingle(displacement.Rows[node4Index][currentStep]) / 100;
-                    Vector3 pos1 = positions[node1Index];
-                    Vector3 pos2 = positions[node2Index];
-                    Vector3 pos3 = positions[node3Index];
-                    Vector3 pos4 = positions[node4Index];
-                    pos1.x += (move1 - groundmove) * amplification;
-                    pos2.x += (move2 - groundmove) * amplification;
-                    pos3.x += (move3 - groundmove) * amplification;
-                    pos4.x += (move4 - groundmove) * amplification;
-                    shell4s[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { pos1, pos2, pos3, pos4 };
+                        Color meshColor = gradient.Evaluate(displacementRatio);
+                        Mesh.material.color = meshColor;
+                    }
+                    for (int i = 0; i < building.s4r.Length; i++)//literate the shears
+                    {
+                        MeshRenderer Mesh = shell4s[i].GetComponent<MeshRenderer>();
+                        int node1Index = (int)building.s4r[i][0];
+                        int node2Index = (int)building.s4r[i][1];
+                        int node3Index = (int)building.s4r[i][2];
+                        int node4Index = (int)building.s4r[i][3];
+                        float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
+                        float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
+                        float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
+                        float move3 = Convert.ToSingle(displacement.Rows[node3Index][currentStep]) / 100;
+                        float move4 = Convert.ToSingle(displacement.Rows[node4Index][currentStep]) / 100;
+                        Vector3 pos1 = positions[node1Index];
+                        Vector3 pos2 = positions[node2Index];
+                        Vector3 pos3 = positions[node3Index];
+                        Vector3 pos4 = positions[node4Index];
+                        pos1.x += (move1 - groundmove) * amplification;
+                        pos2.x += (move2 - groundmove) * amplification;
+                        pos3.x += (move3 - groundmove) * amplification;
+                        pos4.x += (move4 - groundmove) * amplification;
+                        shell4s[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { pos1, pos2, pos3, pos4 };
 
-                    float displacementRatio = Math.Abs(((move1 + move2 + move3 + move4) / 4) - groundmove) / maxDisplacement;
+                        float displacementRatio = Math.Abs(((move1 + move2 + move3 + move4) / 4) - groundmove) / maxDisplacement;
 
-                    Color meshColor = gradient.Evaluate(displacementRatio);
-                    Mesh.material.color = meshColor;
-                }
+                        Color meshColor = gradient.Evaluate(displacementRatio);
+                        Mesh.material.color = meshColor;
+                    }
+
+                //}
+                //catch { continue; }
             }
 
             //Debug.Log(currentStep);
             currentStep++;
             if (currentStep >= displacement.Columns.Count) { isMoving = false; }
-            
-            yield return new WaitForSeconds(interval);
+
+            yield return null;//new WaitForSeconds(interval);
         }
 
         //recover to the original
@@ -183,21 +188,4 @@ public class earthquake : MonoBehaviour
         gradient.SetKeys(colorKeys, alphaKeys);
         return gradient;
     }
-
-
-    //private void UpdateDisplacementCurve(int nodeIndex)
-    //{
-    //    //// Assuming you have the displacement data for the current step
-    //    //float maxDisplacement = Convert.ToSingle(displacement.Rows[nodeIndex][2 * currentStep]) / 100; 
-    //    //// Calculate max displacement here
-    //    //float time = currentStep * UpdateInterval; // Assuming each step represents a time interval
-
-    //    //Vector3 point = new Vector3(time, maxDisplacement * 5, 0f);
-
-    //    //displacementCurve.transform.SetParent(curvePanel.transform, false);
-
-    //    //displacementCurve.positionCount = currentStep + 1;
-    //    //displacementCurve.SetPosition(currentStep, point);
-    //    //displacementCurve = curve.AddComponent<LineRenderer>();
-    //}
 }

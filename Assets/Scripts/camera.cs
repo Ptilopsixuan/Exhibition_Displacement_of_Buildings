@@ -4,13 +4,15 @@ using UnityEngine;
 
 public class move : MonoBehaviour
 {
-    private static float speed = 5f;
-    private static Vector3 Pos = Vector3.zero;
-    private static Vector3 Rotate = Vector3.zero;
+    float speed = 5f;
+    Vector3 Pos = Vector3.zero;
+    Vector3 Rotate = Vector3.zero;
+    GameObject sight;
+
+    void Start() { sight = gameObject; }
+
     void Update()
     {
-        //GameObject camera = GameObject.FindGameObjectWithTag("MainCamera");
-        GameObject sight = this.gameObject;
         //move 
         Vector3 forward = sight.transform.forward;
         if (Input.GetKey(KeyCode.LeftShift)) { speed = 20f; } else { speed = 5f; }
@@ -28,8 +30,8 @@ public class move : MonoBehaviour
         {
             float My = Input.GetAxis("Mouse X");
             float Mx = Input.GetAxis("Mouse Y");
-            Rotate.y += My * 30 * speed * Time.deltaTime;
-            Rotate.x += -Mx * 30 * speed * Time.deltaTime;
+            Rotate.y += My * speed * Time.deltaTime;
+            Rotate.x += -Mx * speed * Time.deltaTime;
         }
         sight.transform.rotation = Quaternion.Euler(Rotate);
     }
