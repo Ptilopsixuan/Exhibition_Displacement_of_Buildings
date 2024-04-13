@@ -21,12 +21,10 @@ public class readDisplacement : MonoBehaviour
         for (int i = 0; i < groundmove.Columns.Count; i++) 
         {
             fullList.Add(Convert.ToSingle(groundmove.Rows[0][i]) / 100);
-            //fullList.Add((float)groundmove.Rows[0][i] / 100); 
-        } //Error
+            //fullList.Add((float)groundmove.Rows[0][i] / 100);  //Error
+        }
 
         MyClass.Graph.fullList = fullList;
-
-        //foreach (float i in graph.groundmove.ItemArray) { graph.fullList.Add((float)i / 100); }
 
         float endTime = Time.realtimeSinceStartup;
         Debug.Log("readCsvTime: " + (endTime - startTime));
@@ -65,7 +63,9 @@ public class readDisplacement : MonoBehaviour
                 if (!buildingsWithDisplacement[i]) { Debug.Log(Buildings[i].name + " dont got displacement."); }
             }
         }
-        else { Debug.Log("Invalid Seed"); return; }
+        else { 
+            
+            Debug.Log("Invalid Seed"); return; }
     }
 
     void getSeed(out int seedOfEarthquake)

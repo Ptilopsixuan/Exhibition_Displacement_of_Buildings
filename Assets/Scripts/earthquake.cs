@@ -14,15 +14,14 @@ public class earthquake : MonoBehaviour
     static int currentStep = 0;
     static bool isMoving;
 
-    static float UpdateInterval = 0.1f;
+    static float UpdateInterval = 0.2f;
 
     public void StartEarthquakeSimulation()
     {
         currentStep = 0;
         isMoving = true;
         Gradient gradient = ColorBar();
-        //graph g = readDisplacement.g;
-        //Debug.Log("buildings' count: " + buildings.Count);
+        new MyClass.Graph();
         StartCoroutine(IterateSimulation(UpdateInterval, gradient));// repeat this function every set interval
     }
 
@@ -31,9 +30,7 @@ public class earthquake : MonoBehaviour
         while (isMoving)//Loop the time steps
         {
             print(1);
-
-            MyClass.Graph gg = new MyClass.Graph();
-            gg.Exhibition(currentStep);
+            MyClass.Graph.graph.Exhibition(currentStep);
 
             foreach (MyClass.Building building in MyClass.Building.buildings)//Loop the buildings
             {
@@ -44,23 +41,15 @@ public class earthquake : MonoBehaviour
                     float amplification = amplificationSlider.value; // Get amplification value each iteration
 
                     //classify all the children GameObjects
-                    //Transform[] childObjects = building.original.transform.GetComponentsInChildren<Transform>();
-                    List<GameObject> conns = building.childrenConn;//new List<GameObject>();
-                    List<GameObject> shell3s = building.childrenS3R;//new List<GameObject>();
-                    List<GameObject> shell4s = building.childrenS4R;//new List<GameObject>();
-                    //foreach (Transform childObject in childObjects)
-                    //{
-                    //    if (childObject.CompareTag("line")) { conns.Add(childObject.gameObject); }
-                    //    else if (childObject.CompareTag("shell3")) { shell3s.Add(childObject.gameObject); }
-                    //    else if (childObject.CompareTag("shell4")) { shell4s.Add(childObject.gameObject); }
-                    //}
+                    List<GameObject> conns = building.childrenConn;
+                    List<GameObject> shell3s = building.childrenS3R;
+                    List<GameObject> shell4s = building.childrenS4R;
 
                     for (int i = 0; i < building.conn.Length; i++)//literate the connections
                     {
                         LineRenderer line = conns[i].GetComponent<LineRenderer>();
                         int node1Index = (int)building.conn[i][0];
                         int node2Index = (int)building.conn[i][1];
-                        //in following 3 lines, multiply by 2 to skip a column,
                         //devided by 100 to amplify displacements 100 times because of coordinates are devided by 1e4
                         float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
                         float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
@@ -131,12 +120,9 @@ public class earthquake : MonoBehaviour
                 //}
                 //catch { continue; }
             }
-
-            //Debug.Log(currentStep);
             currentStep++;
             if (currentStep >= displacement.Columns.Count) { isMoving = false; }
-
-            yield return null;//new WaitForSeconds(interval);
+            yield return new WaitForSecondsRealtime(interval);
         }
 
         //recover to the original

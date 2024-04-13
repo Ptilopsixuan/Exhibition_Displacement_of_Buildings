@@ -53,33 +53,19 @@ public class MyClass : MonoBehaviour
             DataTable s4rDt = new DataTable();
             for (int i = 0; i < 4; i++) { s4rDt.Columns.Add(new DataColumn(i.ToString())); }
 
-            //read .inp
-
-            //string content = File.ReadAllText(filePath);
-            
-            //Regex IsNode = new Regex("\\*Node$");
-            //Regex IsConn = new Regex(".*=B3.*");//to find connection
-            //Regex IsS3R = new Regex(".*=S3R");//to find 3 points' wall
-            //Regex IsS4R = new Regex(".*=S4R");//to find 4 points' wall
-            //if (IsNode.IsMatch(content)) 
-            //{
-
-            //}
+            Regex IsStop = new Regex("^\\*.*");//to stop
+            Regex IsNode = new Regex("\\*Node$");
+            Regex IsConn = new Regex(".*=B3.*");//to find connection
+            Regex IsS3R = new Regex(".*=S3R");//to find 3 points' wall
+            Regex IsS4R = new Regex(".*=S4R");//to find 4 points' wall
 
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                
                 using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
                 {
                     string strLine = "";//record words of every line
                     string[] aryLine = null;//trans data
-                    int n = 0;//Debug
-                    Regex IsStop = new Regex("^\\*.*");//to stop
-                    Regex IsNode = new Regex("\\*Node$");
-                    Regex IsConn = new Regex(".*=B3.*");//to find connection
-                    Regex IsS3R = new Regex(".*=S3R");//to find 3 points' wall
-                    Regex IsS4R = new Regex(".*=S4R");//to find 4 points' wall
-
+                    int n = 0;
                     while ((strLine = sr.ReadLine()) != null)//collect corresponding data
                     {
 
@@ -111,12 +97,33 @@ public class MyClass : MonoBehaviour
                         }
                         n++;
                     }
-                    sr.Close();
                     fs.Close();
                 }
             }
 
             //(pos, _) = dt2pos(nodeDt);
+            pos = dt2vec(nodeDt, 3).Select(v => new Vector3(v.x / 10000, v.z / 10000, v.y / 10000)).ToArray();//y is height in Unity, while z is height in .inp
+            conn = dt2vec(connDt, 2).Select(v => new Vector2(v.x, v.y)).ToArray();
+            s3r = dt2vec(s3rDt, 3).Select(v => new Vector3(v.x, v.y, v.z)).ToArray();
+            s4r = dt2vec(s4rDt, 4);
+        }
+
+        public void ReadTxt(string filePath)
+        {
+            DataTable nodeDt = new DataTable();
+            for (int i = 0; i < 3; i++) { nodeDt.Columns.Add(new DataColumn(i.ToString())); }
+            DataTable connDt = new DataTable();
+            for (int i = 0; i < 2; i++) { connDt.Columns.Add(new DataColumn(i.ToString())); }
+            DataTable s3rDt = new DataTable();
+            for (int i = 0; i < 3; i++) { s3rDt.Columns.Add(new DataColumn(i.ToString())); }
+            DataTable s4rDt = new DataTable();
+            for (int i = 0; i < 4; i++) { s4rDt.Columns.Add(new DataColumn(i.ToString())); }
+
+            read(filePath + "/Node.txt", nodeDt, 3);
+            read(filePath + "/Conn.txt", connDt, 2);
+            read(filePath + "/S3R.txt", s3rDt, 3);
+            read(filePath + "/S4R.txt", s4rDt, 4);
+
             pos = dt2vec(nodeDt, 3).Select(v => new Vector3(v.x / 10000, v.z / 10000, v.y / 10000)).ToArray();//y is height in Unity, while z is height in .inp
             conn = dt2vec(connDt, 2).Select(v => new Vector2(v.x, v.y)).ToArray();
             s3r = dt2vec(s3rDt, 3).Select(v => new Vector3(v.x, v.y, v.z)).ToArray();
@@ -182,6 +189,24 @@ public class MyClass : MonoBehaviour
                     shell4.transform.parent = original.transform;
                     childrenS4R.Add(shell4);
                 }
+            }
+        }
+
+        private void read(string filePath, DataTable dt, int n)
+        {
+            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
+                {
+                    string strLine = "";//record words of every line
+                    string[] aryLine = null;//trans data
+                    while ((strLine = sr.ReadLine()) != null)//collect corresponding data
+                    {
+                        aryLine = strLine.Split(',');
+                        str2dt(dt, aryLine, n);
+                    }
+                }
+                fs.Close();
             }
         }
 
@@ -284,12 +309,12 @@ public class MyClass : MonoBehaviour
     {
         private RectTransform graphContainer = GameObject.Find("graphContainer").GetComponent<RectTransform>();
         public static List<float> fullList = new List<float>();
+        public static Graph graph;
 
-        public Graph() { }
+        public Graph() { graph = this; }
 
         public void Exhibition(int currentStep)
         {
-            //graphContainer = GameObject.Find("graphContainer").GetComponent<RectTransform>();
             if (currentStep != 0)
             {
                 setDefault(graphContainer.GetComponent<Transform>());
@@ -356,6 +381,87 @@ public class MyClass : MonoBehaviour
                 for (int i = 0; i < parent.childCount; i++)
                 { Destroy(parent.GetChild(i).gameObject); }
             }
+        }
+    }
+
+    public class Message
+    {
+        private GameObject mainmenu = GameObject.Find("MainMenu");
+        private GameObject imgMessage = new GameObject("imgMessage");
+        private GameObject bgMessage = new GameObject("bgMessage", typeof(Image));
+        private GameObject txtMessage = new GameObject("txtMessage");
+        private GameObject btnConfirm = new GameObject("btnConfirm");
+        private GameObject txtConfirm = new GameObject("txtConfirm");
+        Font font = Resources.Load<Font>("DottedSongtiDiamondRegular");
+        public static Message message;
+
+        public Message(string content)
+        {
+            imgMessage.transform.SetParent(mainmenu.transform, false);
+            RectTransform rectImgMessage = imgMessage.AddComponent<RectTransform>();
+            rectImgMessage.anchorMin = new Vector2(.5f, .5f);
+            rectImgMessage.anchorMax = new Vector2(.5f, .5f);
+            rectImgMessage.sizeDelta = new Vector2(300, 100);
+
+            bgMessage.transform.SetParent(imgMessage.transform, false);
+            //bgMessage.AddComponent<Image>().color;
+            bgMessage.GetComponent<Image>().color = new Color(0,1,1,.3f);
+            RectTransform rectBgMessage = bgMessage.GetComponent<RectTransform>();
+            rectBgMessage.anchorMin = new Vector2(0, 0);
+            rectBgMessage.anchorMax = new Vector2(1, 1);
+            rectBgMessage.offsetMin = new Vector2(0, 0);
+            rectBgMessage.offsetMax = new Vector2(0, 0);
+            //rectBgMessage.anchoredPosition
+
+            txtMessage.transform.SetParent(imgMessage.transform, false);
+            Text txtTxtMessage = txtMessage.AddComponent<Text>();
+            txtTxtMessage.text = content;
+            txtTxtMessage.color = Color.black;
+            txtTxtMessage.font = font;
+            txtTxtMessage.fontSize = 18;
+            txtTxtMessage.alignment = TextAnchor.MiddleCenter;
+            RectTransform rectTxtMessage = txtMessage.GetComponent<RectTransform>();
+            rectTxtMessage.anchorMin = new Vector2(0, .3f);
+            rectTxtMessage.anchorMax = new Vector2(1f, 1f);
+            rectTxtMessage.offsetMin = new Vector2(0, 0);
+            rectTxtMessage.offsetMax = new Vector2(0, 0);
+
+            btnConfirm.transform.SetParent(imgMessage.transform, false);
+            btnConfirm.AddComponent<Image>().color = Color.white;
+            RectTransform rectBtnConfirm = btnConfirm.GetComponent<RectTransform>();
+            rectBtnConfirm.anchorMin = new Vector2(.35f, 0f);
+            rectBtnConfirm.anchorMax = new Vector2(.65f, .3f);
+            rectBtnConfirm.anchoredPosition = new Vector2(.5f, 0f);
+            rectBtnConfirm.offsetMin = new Vector2(0, 0);
+            rectBtnConfirm.offsetMax = new Vector2(0, 0);
+            btnConfirm.AddComponent<Button>().onClick.AddListener(Close);
+
+            txtConfirm.transform.SetParent(btnConfirm.transform, false);
+            Text txtTxtConfirm = txtConfirm.AddComponent<Text>();
+            txtTxtConfirm.text = "Confirm";
+            txtTxtConfirm.font = font;
+            txtTxtConfirm.color = Color.black;
+            txtTxtConfirm.alignment = TextAnchor.MiddleCenter;
+            txtTxtConfirm.fontStyle = FontStyle.BoldAndItalic;
+            txtTxtConfirm.resizeTextForBestFit = true;
+            txtTxtConfirm.resizeTextMaxSize = 20;
+            RectTransform rectTxtConfirm = txtConfirm.GetComponent<RectTransform>();
+            rectTxtConfirm.anchorMin = Vector2.zero;
+            rectTxtConfirm.anchorMax = Vector2.one;
+            rectTxtConfirm.offsetMin = new Vector2(0, 0);
+            rectTxtConfirm.offsetMax = new Vector2(0, 0);
+
+            message = this;
+        }
+
+        public void ChangeTxt(string content)
+        {
+            txtMessage.GetComponent<Text>().text = content;
+        }
+
+        private void Close()
+        {
+            Destroy(imgMessage);
         }
     }
 }
