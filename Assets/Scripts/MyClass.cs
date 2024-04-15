@@ -192,6 +192,82 @@ public class MyClass : MonoBehaviour
             }
         }
 
+        public void UpdateBuilding(int currentStep, float maxDisplacement, Gradient gradient, float amplification) 
+        {
+            for (int i = 0; i < conn.Length; i++)//literate the connections
+            {
+                LineRenderer line = childrenConn[i].GetComponent<LineRenderer>();
+                int node1Index = (int)conn[i][0];
+                int node2Index = (int)conn[i][1];
+                //devided by 100 to amplify displacements 100 times because of coordinates are devided by 1e4
+                float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
+                float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
+                float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
+                Vector3 pos1 = pos[node1Index];
+                Vector3 pos2 = pos[node2Index];
+                pos1.x += (move1 - groundmove) * amplification;
+                pos2.x += (move2 - groundmove) * amplification;
+                line.SetPositions(new Vector3[2] { pos1, pos2 });
+
+                float displacementRatio = Math.Abs(((move1 + move2) / 2) - groundmove) / maxDisplacement;
+
+                Color lineColor = gradient.Evaluate(displacementRatio);
+                line.GetComponent<LineRenderer>().material.color = lineColor;
+            }
+            //same as the line
+            for (int i = 0; i < s3r.Length; i++)//literate the shells
+            {
+                MeshRenderer Mesh = childrenS3R[i].GetComponent<MeshRenderer>();
+                int node1Index = (int)s3r[i][0];
+                int node2Index = (int)s3r[i][1];
+                int node3Index = (int)s3r[i][2];
+                float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
+                float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
+                float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
+                float move3 = Convert.ToSingle(displacement.Rows[node3Index][currentStep]) / 100;
+                Vector3 pos1 = pos[node1Index];
+                Vector3 pos2 = pos[node2Index];
+                Vector3 pos3 = pos[node3Index];
+                pos1.x += (move1 - groundmove) * amplification;
+                pos2.x += (move2 - groundmove) * amplification;
+                pos3.x += (move3 - groundmove) * amplification;
+                childrenS3R[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { pos1, pos2, pos3 };
+
+                float displacementRatio = Math.Abs(((move1 + move2 + move3) / 3) - groundmove) / maxDisplacement;
+
+                Color meshColor = gradient.Evaluate(displacementRatio);
+                Mesh.material.color = meshColor;
+            }
+            for (int i = 0; i < s4r.Length; i++)//literate the shears
+            {
+                MeshRenderer Mesh = childrenS4R[i].GetComponent<MeshRenderer>();
+                int node1Index = (int)s4r[i][0];
+                int node2Index = (int)s4r[i][1];
+                int node3Index = (int)s4r[i][2];
+                int node4Index = (int)s4r[i][3];
+                float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
+                float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
+                float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
+                float move3 = Convert.ToSingle(displacement.Rows[node3Index][currentStep]) / 100;
+                float move4 = Convert.ToSingle(displacement.Rows[node4Index][currentStep]) / 100;
+                Vector3 pos1 = pos[node1Index];
+                Vector3 pos2 = pos[node2Index];
+                Vector3 pos3 = pos[node3Index];
+                Vector3 pos4 = pos[node4Index];
+                pos1.x += (move1 - groundmove) * amplification;
+                pos2.x += (move2 - groundmove) * amplification;
+                pos3.x += (move3 - groundmove) * amplification;
+                pos4.x += (move4 - groundmove) * amplification;
+                childrenS4R[i].GetComponent<MeshFilter>().mesh.vertices = new Vector3[] { pos1, pos2, pos3, pos4 };
+
+                float displacementRatio = Math.Abs(((move1 + move2 + move3 + move4) / 4) - groundmove) / maxDisplacement;
+
+                Color meshColor = gradient.Evaluate(displacementRatio);
+                Mesh.material.color = meshColor;
+            }
+        }
+
+
         private void read(string filePath, DataTable dt, int n)
         {
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
@@ -307,18 +383,18 @@ public class MyClass : MonoBehaviour
 
     public class Graph
     {
-        private RectTransform graphContainer = GameObject.Find("graphContainer").GetComponent<RectTransform>();
+        private RectTransform graphContainer;
         public static List<float> fullList = new List<float>();
         public static Graph graph;
 
-        public Graph() { graph = this; }
+        public Graph(RectTransform graphContainer) { graph = this; this.graphContainer = graphContainer; }
 
         public void Exhibition(int currentStep)
         {
-            if (currentStep != 0)
+            if (currentStep != 0 && currentStep%2 == 1)
             {
                 setDefault(graphContainer.GetComponent<Transform>());
-                List<float> currentList = fullList.Take(currentStep).ToList();
+                List<float> currentList = fullList.Take(currentStep + 2).ToList();
                 ShowGraph(currentList);
             }
         }
@@ -332,7 +408,7 @@ public class MyClass : MonoBehaviour
             float xSize = graphWidth / valueList.Count;
 
             GameObject lastCircleGameObject = null;
-            for (int i = 0; i < valueList.Count; i++)
+            for (int i = 0; i < valueList.Count; i += 2)
             {
                 float xPosition = i * xSize;
                 float yPosition = ((valueList[i] - yMin) / (yMax - yMin)) * graphHeight;
@@ -348,10 +424,9 @@ public class MyClass : MonoBehaviour
 
         private GameObject CreateCircle(Vector2 anchoredPosition)
         {
-            GameObject gameObject = new GameObject("circle", typeof(Image));
+            GameObject gameObject = new GameObject("circle");
             gameObject.transform.SetParent(graphContainer, false);
-            //gameObject.GetComponent<Image>().sprite = circleSprite;
-            RectTransform rectTransform = gameObject.GetComponent<RectTransform>();
+            RectTransform rectTransform = gameObject.AddComponent<RectTransform>();
             rectTransform.anchoredPosition = anchoredPosition;
             rectTransform.sizeDelta = new Vector2(2, 2);
             rectTransform.anchorMin = Vector2.zero;
@@ -392,7 +467,7 @@ public class MyClass : MonoBehaviour
         private GameObject txtMessage = new GameObject("txtMessage");
         private GameObject btnConfirm = new GameObject("btnConfirm");
         private GameObject txtConfirm = new GameObject("txtConfirm");
-        Font font = Resources.Load<Font>("DottedSongtiDiamondRegular");
+        Font font = Resources.Load<Font>("Dot");
         public static Message message;
 
         public Message(string content)

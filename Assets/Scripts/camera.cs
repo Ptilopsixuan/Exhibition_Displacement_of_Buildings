@@ -30,8 +30,8 @@ public class move : MonoBehaviour
         {
             float My = Input.GetAxis("Mouse X");
             float Mx = Input.GetAxis("Mouse Y");
-            Rotate.y += My * speed * Time.deltaTime;
-            Rotate.x += -Mx * speed * Time.deltaTime;
+            Rotate.y += My * speed * Time.deltaTime * 3;
+            Rotate.x += -Mx * speed * Time.deltaTime * 3;
         }
         sight.transform.rotation = Quaternion.Euler(Rotate);
     }

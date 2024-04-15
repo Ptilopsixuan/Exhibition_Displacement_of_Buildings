@@ -6,26 +6,33 @@ public class exhibition : MonoBehaviour
 {
     public void Exhibition()
     {
+        int count = gameObject.transform.childCount;
+        RectTransform rect = gameObject.GetComponent<RectTransform>();
+        Vector2 anchor = rect.anchorMax;
         GameObject background = gameObject.transform.GetChild(0).gameObject;
-        GameObject graphContainer = gameObject.transform.GetChild(1).gameObject;
-        GameObject botton = gameObject.transform.GetChild(2).gameObject;
-        if (graphContainer.activeInHierarchy == true)
+        GameObject botton = gameObject.transform.GetChild(count - 1).gameObject;
+        if (background.activeInHierarchy == true)
         {
-            graphContainer.SetActive(false); background.SetActive(false);
+            for (int i = 0; i < count - 1; i++) { gameObject.transform.GetChild(i).gameObject.SetActive(false); }
+            //RectTransform rect = gameObject.GetComponent<RectTransform>();
+
+            rect.anchorMax = new Vector2(0.012f, anchor.y);
             RectTransform btnRect = botton.GetComponent<RectTransform>();
-            btnRect.anchorMax = new Vector2(0.5f, 1f);
-            btnRect.anchorMin = new Vector2(0.5f, 1f);
-            btnRect.pivot = new Vector2(0.5f, 1f);
-            botton.transform.GetComponentInChildren<Text>().text = "Exhibition";
+
+            btnRect.anchorMax = new Vector2(1f, 0.85f);
+            btnRect.anchorMin = new Vector2(0f, 0.15f);
+            //btnRect.pivot = new Vector2(0.5f, 1f);
+            botton.transform.GetComponentInChildren<Text>().text = ">";
         }
-        else 
-        { 
-            graphContainer.SetActive(true); background.SetActive(true);
+        else
+        {
+            for (int i = 0; i < count - 1; i++) { gameObject.transform.GetChild(i).gameObject.SetActive(true); }
+            //RectTransform rect = gameObject.GetComponent<RectTransform>();
+            rect.anchorMax = new Vector2(0.3f, anchor.y);
             RectTransform btnRect = botton.GetComponent<RectTransform>();
-            btnRect.anchorMax = new Vector2(0.5f, 0f);
-            btnRect.anchorMin = new Vector2(0.5f, 0f);
-            btnRect.pivot = new Vector2(0.5f, 0f);
-            botton.transform.GetComponentInChildren<Text>().text = "UnExhibition";
+            btnRect.anchorMax = new Vector2(1f, 0.85f);
+            btnRect.anchorMin = new Vector2(0.96f, 0.15f);
+            botton.transform.GetComponentInChildren<Text>().text = "<";
         }
     }
 }

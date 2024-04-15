@@ -31,7 +31,7 @@ public class createParent : MonoBehaviour
                 original.AddComponent<oneTremble>();
                 original.transform.parent = area.transform;
 
-                yield return new WaitForSecondsRealtime(0.1f);
+                yield return new WaitForSeconds(0.1f);
             }
         }
     }

@@ -20,10 +20,8 @@ public class readDisplacement : MonoBehaviour
         List<float>fullList = new List<float>();
         for (int i = 0; i < groundmove.Columns.Count; i++) 
         {
-            fullList.Add(Convert.ToSingle(groundmove.Rows[0][i]) / 100);
-            //fullList.Add((float)groundmove.Rows[0][i] / 100);  //Error
+            fullList.Add(Convert.ToSingle(groundmove.Rows[0][i]) / 100);            //fullList.Add((float)groundmove.Rows[0][i] / 100);  //Error
         }
-
         MyClass.Graph.fullList = fullList;
 
         float endTime = Time.realtimeSinceStartup;

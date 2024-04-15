@@ -102,7 +102,7 @@ public class oneTremble : MonoBehaviour
                 Mesh.material.color = meshColor;
             }
 
-            yield return new WaitForSecondsRealtime(0.1f);
+            yield return new WaitForSeconds(0.1f);
         }
     }
 
