@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text;
 using UnityEngine;
-using static UnityEngine.UI.Image;
 
 public class MyFunc : MonoBehaviour
 {

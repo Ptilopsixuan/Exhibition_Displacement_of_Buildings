@@ -16,11 +16,11 @@ public class exhibition : MonoBehaviour
             for (int i = 0; i < count - 1; i++) { gameObject.transform.GetChild(i).gameObject.SetActive(false); }
             //RectTransform rect = gameObject.GetComponent<RectTransform>();
 
-            rect.anchorMax = new Vector2(0.012f, anchor.y);
+            rect.anchorMax = new Vector2(0.0105f, anchor.y);
             RectTransform btnRect = botton.GetComponent<RectTransform>();
 
-            btnRect.anchorMax = new Vector2(1f, 0.85f);
-            btnRect.anchorMin = new Vector2(0f, 0.15f);
+            btnRect.anchorMax = new Vector2(1f, 0.55f);
+            btnRect.anchorMin = new Vector2(0f, 0.13f);
             //btnRect.pivot = new Vector2(0.5f, 1f);
             botton.transform.GetComponentInChildren<Text>().text = ">";
         }
@@ -30,8 +30,8 @@ public class exhibition : MonoBehaviour
             //RectTransform rect = gameObject.GetComponent<RectTransform>();
             rect.anchorMax = new Vector2(0.3f, anchor.y);
             RectTransform btnRect = botton.GetComponent<RectTransform>();
-            btnRect.anchorMax = new Vector2(1f, 0.85f);
-            btnRect.anchorMin = new Vector2(0.96f, 0.15f);
+            btnRect.anchorMax = new Vector2(1f, 0.55f);
+            btnRect.anchorMin = new Vector2(0.965f, 0.13f);
             botton.transform.GetComponentInChildren<Text>().text = "<";
         }
     }

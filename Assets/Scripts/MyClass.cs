@@ -7,6 +7,7 @@ using UnityEngine.UI;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using NumSharp;
 
 public class MyClass : MonoBehaviour
 {
@@ -16,10 +17,16 @@ public class MyClass : MonoBehaviour
         public string filePath;
         public Material material;
         public GameObject original;
-        public Vector3[] pos;
-        public Vector2[] conn;
-        public Vector3[] s3r;
-        public Vector4[] s4r;
+
+        public List<Vector3> pos = new List<Vector3>();
+        public List<Vector2> conn = new List<Vector2>();
+        public List<Vector3> s3r = new List<Vector3>();
+        public List<Vector4> s4r = new List<Vector4>();
+        public int ground;// x & height & temp not be used
+        //public NDArray posA = np.zeros(0);
+        //public NDArray connA = np.zeros(0);
+        //public NDArray s3rA = np.zeros(0);
+        //public NDArray s4rA = np.zeros(0);
         public List<GameObject> childrenConn = new List<GameObject>();
         public List<GameObject> childrenS3R = new List<GameObject>();
         public List<GameObject> childrenS4R = new List<GameObject>();
@@ -43,22 +50,11 @@ public class MyClass : MonoBehaviour
             bool s4rBegin = false;
             bool s3rBegin = false;
 
-            //store different data
-            DataTable nodeDt = new DataTable();
-            for (int i = 0; i < 3; i++) { nodeDt.Columns.Add(new DataColumn(i.ToString())); }
-            DataTable connDt = new DataTable();
-            for (int i = 0; i < 2; i++) { connDt.Columns.Add(new DataColumn(i.ToString())); }
-            DataTable s3rDt = new DataTable();
-            for (int i = 0; i < 3; i++) { s3rDt.Columns.Add(new DataColumn(i.ToString())); }
-            DataTable s4rDt = new DataTable();
-            for (int i = 0; i < 4; i++) { s4rDt.Columns.Add(new DataColumn(i.ToString())); }
-
             Regex IsStop = new Regex("^\\*.*");//to stop
             Regex IsNode = new Regex("\\*Node$");
             Regex IsConn = new Regex(".*=B3.*");//to find connection
             Regex IsS3R = new Regex(".*=S3R");//to find 3 points' wall
             Regex IsS4R = new Regex(".*=S4R");//to find 4 points' wall
-
             using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
                 using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
@@ -68,7 +64,6 @@ public class MyClass : MonoBehaviour
                     int n = 0;
                     while ((strLine = sr.ReadLine()) != null)//collect corresponding data
                     {
-
                         if (IsStop.IsMatch(strLine)) { nodeBegin = false; connBegin = false; s3rBegin = false; s4rBegin = false; }
                         if (IsNode.IsMatch(strLine)) { nodeBegin = true; n++; continue; }//print("n1" + n); 
                         if (IsConn.IsMatch(strLine)) { connBegin = true; n++; continue; }//print("n2" + n);
@@ -78,61 +73,49 @@ public class MyClass : MonoBehaviour
                         if (nodeBegin)
                         {
                             aryLine = strLine.Split(',');
-                            str2dt(nodeDt, aryLine, 3);
+                            float[] a = Array.ConvertAll(aryLine, float.Parse);
+                            Vector3 b = new Vector3(a[1]/10000, a[3]/10000, a[2]/10000);
+                            pos.Add(b);
+                            //var ndArray = np.array(Array.ConvertAll(aryLine, float.Parse));
+                            //posA = np.concatenate(new NDArray[] { posA, ndArray });
                         }
                         else if (connBegin)
                         {
                             aryLine = strLine.Split(',');
-                            str2dt(connDt, aryLine, 2);
+                            float[] a = Array.ConvertAll(aryLine, float.Parse);
+                            Vector2 b = new Vector2(a[1], a[2]);
+                            conn.Add(b);
+                            //var ndArray = np.array(Array.ConvertAll(aryLine, float.Parse));
+                            //connA = np.concatenate(new NDArray[] { connA, ndArray });
                         }
                         else if (s3rBegin)
                         {
                             aryLine = strLine.Split(',');
-                            str2dt(s3rDt, aryLine, 3);
+                            float[] a = Array.ConvertAll(aryLine, float.Parse);
+                            Vector3 b = new Vector3(a[1], a[2], a[3]);
+                            s3r.Add(b);
+                            //var ndArray = np.array(Array.ConvertAll(aryLine, float.Parse));
+                            //s3rA = np.concatenate(new NDArray[] { s3rA, ndArray });
                         }
                         else if (s4rBegin)
                         {
                             aryLine = strLine.Split(',');
-                            str2dt(s4rDt, aryLine, 4);
+                            float[] a = Array.ConvertAll(aryLine, float.Parse);
+                            Vector4 b = new Vector4(a[1], a[2], a[3], a[4]);
+                            s4r.Add(b);
+                            //var ndArray = np.array(Array.ConvertAll(aryLine, float.Parse));
+                            //s4rA = np.concatenate(new NDArray[] { s4rA, ndArray });
                         }
                         n++;
                     }
                     fs.Close();
                 }
             }
-
-            //(pos, _) = dt2pos(nodeDt);
-            pos = dt2vec(nodeDt, 3).Select(v => new Vector3(v.x / 10000, v.z / 10000, v.y / 10000)).ToArray();//y is height in Unity, while z is height in .inp
-            conn = dt2vec(connDt, 2).Select(v => new Vector2(v.x, v.y)).ToArray();
-            s3r = dt2vec(s3rDt, 3).Select(v => new Vector3(v.x, v.y, v.z)).ToArray();
-            s4r = dt2vec(s4rDt, 4);
-        }
-
-        public void ReadTxt(string filePath)
-        {
-            DataTable nodeDt = new DataTable();
-            for (int i = 0; i < 3; i++) { nodeDt.Columns.Add(new DataColumn(i.ToString())); }
-            DataTable connDt = new DataTable();
-            for (int i = 0; i < 2; i++) { connDt.Columns.Add(new DataColumn(i.ToString())); }
-            DataTable s3rDt = new DataTable();
-            for (int i = 0; i < 3; i++) { s3rDt.Columns.Add(new DataColumn(i.ToString())); }
-            DataTable s4rDt = new DataTable();
-            for (int i = 0; i < 4; i++) { s4rDt.Columns.Add(new DataColumn(i.ToString())); }
-
-            read(filePath + "/Node.txt", nodeDt, 3);
-            read(filePath + "/Conn.txt", connDt, 2);
-            read(filePath + "/S3R.txt", s3rDt, 3);
-            read(filePath + "/S4R.txt", s4rDt, 4);
-
-            pos = dt2vec(nodeDt, 3).Select(v => new Vector3(v.x / 10000, v.z / 10000, v.y / 10000)).ToArray();//y is height in Unity, while z is height in .inp
-            conn = dt2vec(connDt, 2).Select(v => new Vector2(v.x, v.y)).ToArray();
-            s3r = dt2vec(s3rDt, 3).Select(v => new Vector3(v.x, v.y, v.z)).ToArray();
-            s4r = dt2vec(s4rDt, 4);
         }
 
         public void DrawBuilding()
         {
-            //draw the points of .inp
+            ////draw the points of .inp
             //for (int i = 0; i < building.pos.Length; i++)//iterate each Node
             //{
             //    GameObject point = new GameObject(building.name + i);
@@ -141,65 +124,54 @@ public class MyClass : MonoBehaviour
             //    point.transform.parent = building.original.transform;//set points' parent object in order to control
             //    point.tag = "point";
             //}
-            if (conn != null)
+            for (int i = 0; i < conn.Count; i++)//iterate each connection
             {
-                for (int i = 0; i < conn.Length; i++)
-                //foreach (Vector2 conn in building.connect) //iterate each connection
-                {
-                    int node1Index = (int)conn[i][0];
-                    int node2Index = (int)conn[i][1];
-                    Vector3 pos1 = pos[node1Index];
-                    Vector3 pos2 = pos[node2Index];
-                    Vector3[] vec = new Vector3[2] { pos1, pos2 };
-                    GameObject connection = createConn(vec, material, "Con" + i, "line");
-                    connection.transform.parent = original.transform;
-                    childrenConn.Add(connection);
-                }
+                int node1Index = (int)conn[i][0] - 1;
+                int node2Index = (int)conn[i][1] - 1;
+                Vector3 pos1 = pos[node1Index];
+                Vector3 pos2 = pos[node2Index];
+                Vector3[] vec = new Vector3[2] { pos1, pos2 };
+                GameObject connection = createConn(vec, material, "Con" + i, "line");
+                connection.transform.parent = original.transform;
+                childrenConn.Add(connection);
             }
-            if (s3r != null)
+            for (int i = 0; i < s3r.Count; i++)//iterate each s3r
             {
-                for (int i = 0; i < s3r.Length; i++)//iterate each s3r
-                {
-                    int node1Index = (int)s3r[i][0];
-                    int node2Index = (int)s3r[i][1];
-                    int node3Index = (int)s3r[i][2];
-                    Vector3 pos1 = pos[node1Index];
-                    Vector3 pos2 = pos[node2Index];
-                    Vector3 pos3 = pos[node3Index];
-                    Vector3[] vec = new Vector3[3] { pos1, pos2, pos3 };
-                    GameObject shell3 = createS3R(vec, material, "S3R" + i, "shell3");
-                    shell3.transform.parent = original.transform;
-                    childrenS3R.Add(shell3);
-                }
+                int node1Index = (int)s3r[i][0] - 1;
+                int node2Index = (int)s3r[i][1] - 1;
+                int node3Index = (int)s3r[i][2] - 1;
+                Vector3 pos1 = pos[node1Index];
+                Vector3 pos2 = pos[node2Index];
+                Vector3 pos3 = pos[node3Index];
+                Vector3[] vec = new Vector3[3] { pos1, pos2, pos3 };
+                GameObject shell3 = createS3R(vec, material, "S3R" + i, "shell3");
+                shell3.transform.parent = original.transform;
+                childrenS3R.Add(shell3);
             }
-            if (s4r != null)
+            for (int i = 0; i < s4r.Count; i++)//iterate each s4r
             {
-                for (int i = 0; i < s4r.Length; i++)//iterate each s4r
-                {
-                    int node1Index = (int)s4r[i][0];
-                    int node2Index = (int)s4r[i][1];
-                    int node3Index = (int)s4r[i][2];
-                    int node4Index = (int)s4r[i][3];
-                    Vector3 pos1 = pos[node1Index];
-                    Vector3 pos2 = pos[node2Index];
-                    Vector3 pos3 = pos[node3Index];
-                    Vector3 pos4 = pos[node4Index];
-                    Vector3[] vec = new Vector3[4] { pos1, pos2, pos3, pos4 };
-                    GameObject shell4 = createS4R(vec, material, "S4R" + i, "shell4");
-                    shell4.transform.parent = original.transform;
-                    childrenS4R.Add(shell4);
-                }
+                int node1Index = (int)s4r[i][0] - 1;
+                int node2Index = (int)s4r[i][1] - 1;
+                int node3Index = (int)s4r[i][2] - 1;
+                int node4Index = (int)s4r[i][3] - 1;
+                Vector3 pos1 = pos[node1Index];
+                Vector3 pos2 = pos[node2Index];
+                Vector3 pos3 = pos[node3Index];
+                Vector3 pos4 = pos[node4Index];
+                Vector3[] vec = new Vector3[4] { pos1, pos2, pos3, pos4 };
+                GameObject shell4 = createS4R(vec, material, "S4R" + i, "shell4");
+                shell4.transform.parent = original.transform;
+                childrenS4R.Add(shell4);
             }
         }
 
-        public void UpdateBuilding(int currentStep, float maxDisplacement, Gradient gradient, float amplification) 
+        public void UpdateBuilding(int currentStep, float maxDisplacement, Gradient gradient, float amplification)
         {
-            for (int i = 0; i < conn.Length; i++)//literate the connections
+            for (int i = 0; i < conn.Count; i++)//literate the connections
             {
                 LineRenderer line = childrenConn[i].GetComponent<LineRenderer>();
-                int node1Index = (int)conn[i][0];
-                int node2Index = (int)conn[i][1];
-                //devided by 100 to amplify displacements 100 times because of coordinates are devided by 1e4
+                int node1Index = (int)conn[i][0] - 1;
+                int node2Index = (int)conn[i][1] - 1;
                 float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
                 float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
                 float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
@@ -207,20 +179,17 @@ public class MyClass : MonoBehaviour
                 Vector3 pos2 = pos[node2Index];
                 pos1.x += (move1 - groundmove) * amplification;
                 pos2.x += (move2 - groundmove) * amplification;
-                line.SetPositions(new Vector3[2] { pos1, pos2 });
-
                 float displacementRatio = Math.Abs(((move1 + move2) / 2) - groundmove) / maxDisplacement;
 
-                Color lineColor = gradient.Evaluate(displacementRatio);
-                line.GetComponent<LineRenderer>().material.color = lineColor;
+                line.SetPositions(new Vector3[2] { pos1, pos2 });
+                line.GetComponent<LineRenderer>().material.color = gradient.Evaluate(displacementRatio);
             }
-            //same as the line
-            for (int i = 0; i < s3r.Length; i++)//literate the shells
+            for (int i = 0; i < s3r.Count; i++)//literate the shells
             {
                 MeshRenderer Mesh = childrenS3R[i].GetComponent<MeshRenderer>();
-                int node1Index = (int)s3r[i][0];
-                int node2Index = (int)s3r[i][1];
-                int node3Index = (int)s3r[i][2];
+                int node1Index = (int)s3r[i][0] - 1;
+                int node2Index = (int)s3r[i][1] - 1;
+                int node3Index = (int)s3r[i][2] - 1;
                 float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
                 float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
                 float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
@@ -238,13 +207,13 @@ public class MyClass : MonoBehaviour
                 Color meshColor = gradient.Evaluate(displacementRatio);
                 Mesh.material.color = meshColor;
             }
-            for (int i = 0; i < s4r.Length; i++)//literate the shears
+            for (int i = 0; i < s4r.Count; i++)//literate the shears
             {
                 MeshRenderer Mesh = childrenS4R[i].GetComponent<MeshRenderer>();
-                int node1Index = (int)s4r[i][0];
-                int node2Index = (int)s4r[i][1];
-                int node3Index = (int)s4r[i][2];
-                int node4Index = (int)s4r[i][3];
+                int node1Index = (int)s4r[i][0] - 1;
+                int node2Index = (int)s4r[i][1] - 1;
+                int node3Index = (int)s4r[i][2] - 1;
+                int node4Index = (int)s4r[i][3] - 1;
                 float groundmove = Convert.ToSingle(displacement.Rows[0][currentStep]) / 100;
                 float move1 = Convert.ToSingle(displacement.Rows[node1Index][currentStep]) / 100;
                 float move2 = Convert.ToSingle(displacement.Rows[node2Index][currentStep]) / 100;
@@ -265,49 +234,6 @@ public class MyClass : MonoBehaviour
                 Color meshColor = gradient.Evaluate(displacementRatio);
                 Mesh.material.color = meshColor;
             }
-        }
-
-
-        private void read(string filePath, DataTable dt, int n)
-        {
-            using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
-            {
-                using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
-                {
-                    string strLine = "";//record words of every line
-                    string[] aryLine = null;//trans data
-                    while ((strLine = sr.ReadLine()) != null)//collect corresponding data
-                    {
-                        aryLine = strLine.Split(',');
-                        str2dt(dt, aryLine, n);
-                    }
-                }
-                fs.Close();
-            }
-        }
-
-        private void str2dt(DataTable dt, string[] aryLine, int n)
-        {
-            DataRow dr = dt.NewRow();
-            for (int i = 0; i < n; i++)
-            {
-                dr[i] = aryLine[i + 1];
-            }
-            dt.Rows.Add(dr);
-        }
-
-        private Vector4[] dt2vec(DataTable dt, int n)
-        {
-            int count = dt.Rows.Count;
-            Vector4[] vec = new Vector4[count];
-            for (int i = 0; i < dt.Rows.Count; i++)
-            {
-                for (int j = 0; j < n; j++)
-                {
-                    vec[i][j] = Convert.ToSingle(dt.Rows[i][j]) - 1;// first node in .inp is 1, while in code is 0.
-                }
-            }
-            return vec;
         }
 
         private GameObject createConn(Vector3[] vec, Material material, string name, string tag)
@@ -378,8 +304,49 @@ public class MyClass : MonoBehaviour
         //    }
         //    return (vec, n);
         //}
-    }
 
+        //private void read(string filePath, DataTable dt, int n, char s)
+        //{
+        //    using (FileStream fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+        //    {
+        //        using (StreamReader sr = new StreamReader(fs, Encoding.UTF8))
+        //        {
+        //            string strLine = "";//record words of every line
+        //            string[] aryLine = null;//trans data
+        //            while ((strLine = sr.ReadLine()) != null)//collect corresponding data
+        //            {
+        //                aryLine = strLine.Split(s);
+        //                str2dt(dt, aryLine, n);
+        //            }
+        //        }
+        //        fs.Close();
+        //    }
+        //}
+
+        //private void str2dt(DataTable dt, string[] aryLine, int n)
+        //{
+        //    DataRow dr = dt.NewRow();
+        //    for (int i = 0; i < n; i++)
+        //    {
+        //        dr[i] = aryLine[i + 1];//first is index we dont need
+        //    }
+        //    dt.Rows.Add(dr);
+        //}
+
+        //private Vector4[] dt2vec(DataTable dt, int n)
+        //{
+        //    int count = dt.Rows.Count;
+        //    Vector4[] vec = new Vector4[count];
+        //    for (int i = 0; i < dt.Rows.Count; i++)
+        //    {
+        //        for (int j = 0; j < n; j++)
+        //        {
+        //            vec[i][j] = Convert.ToSingle(dt.Rows[i][j]);// first node in .inp is 1, while in code is 0.
+        //        }
+        //    }
+        //    return vec;
+        //}
+    }
 
     public class Graph
     {
@@ -391,7 +358,7 @@ public class MyClass : MonoBehaviour
 
         public void Exhibition(int currentStep)
         {
-            if (currentStep != 0 && currentStep%2 == 1)
+            if (currentStep != 0 && currentStep % 2 == 1)
             {
                 setDefault(graphContainer.GetComponent<Transform>());
                 List<float> currentList = fullList.Take(currentStep + 2).ToList();
@@ -467,7 +434,7 @@ public class MyClass : MonoBehaviour
         private GameObject txtMessage = new GameObject("txtMessage");
         private GameObject btnConfirm = new GameObject("btnConfirm");
         private GameObject txtConfirm = new GameObject("txtConfirm");
-        Font font = Resources.Load<Font>("Dot");
+        Font font = Resources.Load<Font>("micro");
         public static Message message;
 
         public Message(string content)
@@ -480,7 +447,7 @@ public class MyClass : MonoBehaviour
 
             bgMessage.transform.SetParent(imgMessage.transform, false);
             //bgMessage.AddComponent<Image>().color;
-            bgMessage.GetComponent<Image>().color = new Color(0,1,1,.3f);
+            bgMessage.GetComponent<Image>().color = new Color(0, 1, 1, .3f);
             RectTransform rectBgMessage = bgMessage.GetComponent<RectTransform>();
             rectBgMessage.anchorMin = new Vector2(0, 0);
             rectBgMessage.anchorMax = new Vector2(1, 1);
@@ -501,6 +468,16 @@ public class MyClass : MonoBehaviour
             rectTxtMessage.offsetMin = new Vector2(0, 0);
             rectTxtMessage.offsetMax = new Vector2(0, 0);
 
+            message = this;
+        }
+
+        public void ChangeTxt(string content)
+        {
+            txtMessage.GetComponent<Text>().text = content;
+        }
+
+        public void ShowConfirm()
+        {
             btnConfirm.transform.SetParent(imgMessage.transform, false);
             btnConfirm.AddComponent<Image>().color = Color.white;
             RectTransform rectBtnConfirm = btnConfirm.GetComponent<RectTransform>();
@@ -525,13 +502,6 @@ public class MyClass : MonoBehaviour
             rectTxtConfirm.anchorMax = Vector2.one;
             rectTxtConfirm.offsetMin = new Vector2(0, 0);
             rectTxtConfirm.offsetMax = new Vector2(0, 0);
-
-            message = this;
-        }
-
-        public void ChangeTxt(string content)
-        {
-            txtMessage.GetComponent<Text>().text = content;
         }
 
         private void Close()

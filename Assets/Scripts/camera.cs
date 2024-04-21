@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class move : MonoBehaviour
 {
     float speed = 5f;
-    Vector3 Pos = Vector3.zero;
+    Vector3 Pos = Vector3.one;
     Vector3 Rotate = Vector3.zero;
     GameObject sight;
 

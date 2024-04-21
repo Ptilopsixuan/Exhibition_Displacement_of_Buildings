@@ -8,11 +8,12 @@ using UnityEngine.UI;
 
 public class readDisplacement : MonoBehaviour
 {
-    public int seedOfEarthquake;
+    public string seedOfEarthquake;
 
     public void ReadDisplacement()
     {
         float startTime = Time.realtimeSinceStartup;
+        new MyClass.Message("Start");
         getSeed(out seedOfEarthquake);
         LoadDisplacement(seedOfEarthquake, MyClass.Building.buildings);
 
@@ -24,11 +25,12 @@ public class readDisplacement : MonoBehaviour
         }
         MyClass.Graph.fullList = fullList;
 
+        MyClass.Message.message.ShowConfirm();
         float endTime = Time.realtimeSinceStartup;
         Debug.Log("readCsvTime: " + (endTime - startTime));
     }
 
-    void LoadDisplacement(int seedOfEarthquake, List<MyClass.Building> Buildings)
+    void LoadDisplacement(string seedOfEarthquake, List<MyClass.Building> Buildings)
     {
         //read displacements
         string displacementPath = Application.streamingAssetsPath + "/" + seedOfEarthquake;//folder including displacements' information
@@ -66,15 +68,15 @@ public class readDisplacement : MonoBehaviour
             Debug.Log("Invalid Seed"); return; }
     }
 
-    void getSeed(out int seedOfEarthquake)
+    void getSeed(out string seedOfEarthquake)
     {
-        seedOfEarthquake = 0;
+        seedOfEarthquake = "0";
         GameObject inputSeed = GameObject.FindGameObjectWithTag("input");
         if (inputSeed != null)
         {
             try
             {
-                seedOfEarthquake = int.Parse(inputSeed.GetComponent<InputField>().text);
+                seedOfEarthquake = inputSeed.GetComponent<InputField>().text;
             }
             catch (Exception e)
             {
